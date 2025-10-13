@@ -1,0 +1,28 @@
+# Node.js
+node_modules/
+contracts/node_modules/
+**/package-lock.json
+npm-debug.log*
+yarn-debug.log*
+
+# Hardhat
+contracts/artifacts/
+contracts/cache/
+
+# Next.js
+.next/
+out/
+
+# dotenv
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# macOS
+.DS_Store
+
+# Build output
+build/
+dist/
