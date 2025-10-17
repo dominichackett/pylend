@@ -47,7 +47,7 @@ contract PoolToken is ERC20, ERC20Burnable, Ownable {
         string memory _name,
         string memory _symbol,
         address _underlyingAsset
-    ) ERC20(_name, _symbol) {
+    ) ERC20(_name, _symbol) Ownable(msg.sender) {
         if (_underlyingAsset == address(0)) revert InvalidAsset();
         underlyingAsset = _underlyingAsset;
     }
@@ -174,23 +174,23 @@ contract PoolToken is ERC20, ERC20Burnable, Ownable {
     }
 
     /**
-     * @notice Disable transfers during initial setup
-     * @dev Can be enabled by removing this override
+     * @notice Hook that is called before any token transfer
+     * @dev OpenZeppelin v5 uses _update instead of _beforeTokenTransfer
      */
-    function _beforeTokenTransfer(
+    function _update(
         address from,
         address to,
-        uint256 amount
+        uint256 value
     ) internal virtual override {
-        super._beforeTokenTransfer(from, to, amount);
-        
         // Allow minting and burning
         if (from == address(0) || to == address(0)) {
+            super._update(from, to, value);
             return;
         }
         
         // Transfers are allowed (makes tokens tradeable)
-        // Remove this check if you want non-transferable tokens
+        // Add require(false, "Transfers disabled") if you want non-transferable tokens
+        super._update(from, to, value);
     }
 }
 

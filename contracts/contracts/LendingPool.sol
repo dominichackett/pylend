@@ -3,12 +3,10 @@ pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-import "@openzeppelin/contracts/security/Pausable.sol";
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/utils/Pausable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "./interfaces/IPriceOracle.sol";
-import "./interfaces/IInterestRateModel.sol";
-import "./interfaces/ILiquidationEngine.sol";
+import "./interfaces/interfaces.sol";
 
 /**
  * @title LendingPool
@@ -89,12 +87,7 @@ contract LendingPool is ReentrancyGuard, Pausable, Ownable {
         LIQUIDATED
     }
 
-    struct CollateralConfig {
-        bool isApproved;
-        bytes32 priceFeedId;           // Pyth price feed ID
-        uint256 liquidationThreshold;   // In basis points (15000 = 150%)
-        uint8 decimals;                // Token decimals
-    }
+    // Note: CollateralConfig is imported from Interfaces.sol
 
     // ============ EVENTS ============
 
@@ -123,7 +116,7 @@ contract LendingPool is ReentrancyGuard, Pausable, Ownable {
         address _priceOracle,
         address _interestRateModel,
         address _treasury
-    ) {
+    ) Ownable(msg.sender) {
         require(_pyusdToken != address(0), "Invalid PYUSD address");
         require(_priceOracle != address(0), "Invalid oracle address");
         require(_interestRateModel != address(0), "Invalid interest model");
@@ -344,11 +337,28 @@ contract LendingPool is ReentrancyGuard, Pausable, Ownable {
         Loan storage loan = loans[loanId];
         require(loan.status == LoanStatus.ACTIVE, "Loan not active");
 
+        // Convert to LoanStruct for liquidation engine
+        LoanStruct memory loanStruct = LoanStruct({
+            id: loan.id,
+            borrower: loan.borrower,
+            borrowedAmount: loan.borrowedAmount,
+            collateralToken: loan.collateralToken,
+            collateralAmount: loan.collateralAmount,
+            interestRate: loan.interestRate,
+            borrowedAt: loan.borrowedAt,
+            lastInterestUpdate: loan.lastInterestUpdate,
+            accruedInterest: loan.accruedInterest,
+            status: uint8(loan.status)
+        });
+
+        // Get collateral config
+        CollateralConfig memory config = approvedCollateral[loan.collateralToken];
+
         // Delegate to liquidation engine
         liquidationEngine.liquidate{value: msg.value}(
             loanId,
-            loan,
-            approvedCollateral[loan.collateralToken],
+            loanStruct,
+            config,
             priceUpdateData
         );
 

@@ -34,7 +34,7 @@ contract PriceOracle is Ownable {
      * @notice Initialize PriceOracle with Pyth contract
      * @param _pyth Address of Pyth contract on Hedera
      */
-    constructor(address _pyth) {
+    constructor(address _pyth) Ownable(msg.sender) {
         require(_pyth != address(0), "Invalid Pyth address");
         pyth = IPyth(_pyth);
     }
@@ -61,8 +61,8 @@ contract PriceOracle is Ownable {
         
         pyth.updatePriceFeeds{value: fee}(priceUpdateData);
 
-        // Get updated price
-        PythStructs.Price memory price = pyth.getPrice(priceFeedId);
+        // Get updated price (use getPriceUnsafe for latest price)
+        PythStructs.Price memory price = pyth.getPriceUnsafe(priceFeedId);
         
         // Validate price
         _validatePrice(price);
@@ -84,7 +84,7 @@ contract PriceOracle is Ownable {
         uint256 tokenAmount,
         uint8 tokenDecimals
     ) external view returns (uint256) {
-        PythStructs.Price memory price = pyth.getPrice(priceFeedId);
+        PythStructs.Price memory price = pyth.getPriceUnsafe(priceFeedId);
         
         // Note: In view mode, we can't enforce price freshness strictly
         // Calling contracts should be aware prices might be stale
@@ -98,7 +98,7 @@ contract PriceOracle is Ownable {
      * @return price Price data structure
      */
     function getPrice(bytes32 priceFeedId) external view returns (PythStructs.Price memory) {
-        return pyth.getPrice(priceFeedId);
+        return pyth.getPriceUnsafe(priceFeedId);
     }
 
     /**
@@ -192,7 +192,7 @@ contract PriceOracle is Ownable {
      * @return bool True if price is fresh
      */
     function isPriceFresh(bytes32 priceFeedId) external view returns (bool) {
-        PythStructs.Price memory price = pyth.getPrice(priceFeedId);
+        PythStructs.Price memory price = pyth.getPriceUnsafe(priceFeedId);
         uint256 priceAge = block.timestamp - price.publishTime;
         return priceAge <= MAX_PRICE_AGE;
     }
@@ -203,7 +203,7 @@ contract PriceOracle is Ownable {
      * @return Age in seconds
      */
     function getPriceAge(bytes32 priceFeedId) external view returns (uint256) {
-        PythStructs.Price memory price = pyth.getPrice(priceFeedId);
+        PythStructs.Price memory price = pyth.getPriceUnsafe(priceFeedId);
         return block.timestamp - price.publishTime;
     }
 
@@ -221,3 +221,23 @@ contract PriceOracle is Ownable {
      */
     receive() external payable {}
 }
+
+/**
+ * USAGE EXAMPLE:
+ * 
+ * // Get Pyth price update data from API
+ * const priceIds = ["0xff61491a931112ddf1bd8147cd1b641375f79f5825126d665480874634fd0ace"]; // ETH/USD
+ * const priceUpdateData = await pythConnection.getPriceFeedsUpdateData(priceIds);
+ * 
+ * // Get USD value of 1 ETH
+ * const fee = await oracle.getUpdateFee(priceUpdateData);
+ * const value = await oracle.getValueUSD(
+ *   ethPriceFeedId,
+ *   parseEther("1"), // 1 ETH
+ *   18, // ETH decimals
+ *   priceUpdateData,
+ *   { value: fee }
+ * );
+ * 
+ * console.log("1 ETH =", formatUnits(value, 6), "USD");
+ */
