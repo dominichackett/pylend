@@ -3,6 +3,8 @@ import chaiAsPromised from "chai-as-promised";
 import { describe, it, beforeEach } from "node:test";
 import { createPublicClient, createWalletClient, http, PublicClient, WalletClient, parseUnits, formatUnits, Hex } from 'viem';
 import { hardhat } from 'viem/chains';
+import { privateKeyToAccount } from "viem/accounts";
+import "dotenv/config";
 
 // Import contract artifacts
 import LendingPoolArtifact from "../artifacts/contracts/LendingPool.sol/LendingPool.json";
@@ -10,6 +12,8 @@ import PriceOracleArtifact from "../artifacts/contracts/PriceOracle.sol/PriceOra
 import InterestRateModelArtifact from "../artifacts/contracts/InterestRateModel.sol/InterestRateModel.json";
 import LiquidationEngineArtifact from "../artifacts/contracts/LiquidationEngine.sol/LiquidationEngine.json";
 import PoolTokenArtifact from "../artifacts/contracts/PoolToken .sol/PoolToken.json";
+import MockERC20Artifact from "../artifacts/contracts/test/MockERC20.sol/MockERC20.json";
+import MockPythArtifact from "../artifacts/contracts/test/MockPyth.sol/MockPyth.json";
 
 use(chaiAsPromised);
 
@@ -45,27 +49,27 @@ describe("PyLend - LendingPool Integration Tests", function () {
             transport: http(),
         });
 
-        const [ownerAddr, aliceAddr, bobAddr, liquidatorAddr] = await publicClient.request({
+        const [, , , liquidatorAddr] = await publicClient.request({
             method: "eth_accounts",
         });
+        
+        console.log(process.env.OWNER_PRIVATE_KEY)
+        const ownerAccount = privateKeyToAccount(process.env.OWNER_PRIVATE_KEY as Hex);
+        const aliceAccount = privateKeyToAccount(process.env.ALICE_PRIVATE_KEY as Hex);
+        const bobAccount = privateKeyToAccount(process.env.BOB_PRIVATE_KEY as Hex);
 
         owner = createWalletClient({
-            account: ownerAddr,
+            account: ownerAccount,
             chain: hardhat,
             transport: http(),
         });
         alice = createWalletClient({
-            account: aliceAddr,
+            account: aliceAccount,
             chain: hardhat,
             transport: http(),
         });
         bob = createWalletClient({
-            account: bobAddr,
-            chain: hardhat,
-            transport: http(),
-        });
-        liquidatorWallet = createWalletClient({
-            account: liquidatorAddr,
+            account: bobAccount,
             chain: hardhat,
             transport: http(),
         });
@@ -210,7 +214,7 @@ describe("PyLend - LendingPool Integration Tests", function () {
 
     describe("Deposits", function () {
         it("Should allow users to deposit PYUSD", async function () {
-            const depositAmount = parseUnits("1000", PYUSD_DECIMALS);
+            const depositAmount = parseUnits("100", PYUSD_DECIMALS);
 
             // Note: User must have PYUSD balance in their wallet
             await alice.writeContract({
@@ -249,7 +253,7 @@ describe("PyLend - LendingPool Integration Tests", function () {
         });
 
         it("Should update total liquidity", async function () {
-            const depositAmount = parseUnits("1000", PYUSD_DECIMALS);
+            const depositAmount = parseUnits("100", PYUSD_DECIMALS);
 
             await alice.writeContract({
                 address: PYUSD_TOKEN,
@@ -519,27 +523,16 @@ describe("PyLend - LendingPool", function () {
             transport: http(),
         });
 
-        const [ownerAddr, aliceAddr, bobAddr, liquidatorAddr] = await publicClient.request({
+        const [, , , liquidatorAddr] = await publicClient.request({
             method: "eth_accounts",
         });
 
+        const ownerAccount = privateKeyToAccount(process.env.OWNER_PRIVATE_KEY as Hex);
+        const aliceAccount = privateKeyToAccount(process.env.ALICE_PRIVATE_KEY as Hex);
+        const bobAccount = privateKeyToAccount(process.env.BOB_PRIVATE_KEY as Hex);
+
         owner = createWalletClient({
-            account: ownerAddr,
-            chain: hardhat,
-            transport: http(),
-        });
-        alice = createWalletClient({
-            account: aliceAddr,
-            chain: hardhat,
-            transport: http(),
-        });
-        bob = createWalletClient({
-            account: bobAddr,
-            chain: hardhat,
-            transport: http(),
-        });
-        liquidator = createWalletClient({
-            account: liquidatorAddr,
+            account: ownerAccount,
             chain: hardhat,
             transport: http(),
         });
@@ -686,7 +679,7 @@ describe("PyLend - LendingPool", function () {
         });
 
         // Mint tokens
-        const INITIAL_BALANCE = parseUnits("100000", PYUSD_DECIMALS);
+        const INITIAL_BALANCE = parseUnits("1000", PYUSD_DECIMALS);
         await owner.writeContract({
             address: pyusd.address,
             abi: pyusd.abi,
@@ -744,7 +737,7 @@ describe("PyLend - LendingPool", function () {
 
     describe("Deposits", function () {
         it("Should allow users to deposit PYUSD", async function () {
-            const depositAmount = parseUnits("1000", PYUSD_DECIMALS);
+            const depositAmount = parseUnits("100", PYUSD_DECIMALS);
 
             await alice.writeContract({
                 address: pyusd.address,
@@ -782,7 +775,7 @@ describe("PyLend - LendingPool", function () {
         });
 
         it("Should update total liquidity", async function () {
-            const depositAmount = parseUnits("1000", PYUSD_DECIMALS);
+            const depositAmount = parseUnits("100", PYUSD_DECIMALS);
 
             await alice.writeContract({
                 address: pyusd.address,
@@ -810,7 +803,7 @@ describe("PyLend - LendingPool", function () {
 
     describe("Withdrawals", function () {
         beforeEach(async function () {
-            const depositAmount = parseUnits("10000", PYUSD_DECIMALS);
+            const depositAmount = parseUnits("100", PYUSD_DECIMALS);
             await alice.writeContract({
                 address: pyusd.address,
                 abi: pyusd.abi,
@@ -826,7 +819,7 @@ describe("PyLend - LendingPool", function () {
         });
 
         it("Should allow users to withdraw", async function () {
-            const withdrawAmount = parseUnits("5000", PYUSD_DECIMALS);
+            const withdrawAmount = parseUnits("100", PYUSD_DECIMALS);
             const initialBalance = await publicClient.readContract({
                 address: pyusd.address,
                 abi: pyusd.abi,
@@ -852,7 +845,7 @@ describe("PyLend - LendingPool", function () {
         });
 
         it("Should reject withdrawal exceeding deposit", async function () {
-            const withdrawAmount = parseUnits("20000", PYUSD_DECIMALS);
+            const withdrawAmount = parseUnits("250", PYUSD_DECIMALS);
 
             await expect(
                 alice.writeContract({
@@ -868,7 +861,7 @@ describe("PyLend - LendingPool", function () {
     describe("Borrowing", function () {
         beforeEach(async function () {
             // Alice deposits liquidity
-            const depositAmount = parseUnits("50000", PYUSD_DECIMALS);
+            const depositAmount = parseUnits("100", PYUSD_DECIMALS);
             await alice.writeContract({
                 address: pyusd.address,
                 abi: pyusd.abi,
@@ -884,7 +877,7 @@ describe("PyLend - LendingPool", function () {
         });
 
         it("Should allow borrowing with sufficient collateral", async function () {
-            const borrowAmount = parseUnits("1000", PYUSD_DECIMALS);
+            const borrowAmount = parseUnits("100", PYUSD_DECIMALS);
             const collateral = parseUnits("1", WETH_DECIMALS); // 1 ETH = $2500
 
             await bob.writeContract({
@@ -913,7 +906,7 @@ describe("PyLend - LendingPool", function () {
         });
 
         it("Should reject borrowing with insufficient collateral", async function () {
-            const borrowAmount = parseUnits("2000", PYUSD_DECIMALS);
+            const borrowAmount = parseUnits("1800", PYUSD_DECIMALS);
             const collateral = parseUnits("1", WETH_DECIMALS); // 1 ETH = $2500, can only borrow ~$1666
 
             await bob.writeContract({
@@ -955,7 +948,7 @@ describe("PyLend - LendingPool", function () {
 
         beforeEach(async function () {
             // Alice deposits liquidity
-            const depositAmount = parseUnits("50000", PYUSD_DECIMALS);
+            const depositAmount = parseUnits("100", PYUSD_DECIMALS);
             await alice.writeContract({
                 address: pyusd.address,
                 abi: pyusd.abi,
@@ -970,7 +963,7 @@ describe("PyLend - LendingPool", function () {
             });
 
             // Bob borrows
-            const borrowAmount = parseUnits("1000", PYUSD_DECIMALS);
+            const borrowAmount = parseUnits("100", PYUSD_DECIMALS);
             const collateral = parseUnits("1", WETH_DECIMALS);
 
             await bob.writeContract({
@@ -1023,7 +1016,7 @@ describe("PyLend - LendingPool", function () {
         });
 
         it("Should allow partial repayment", async function () {
-            const partialAmount = parseUnits("500", PYUSD_DECIMALS);
+            const partialAmount = parseUnits("50", PYUSD_DECIMALS);
 
             await bob.writeContract({
                 address: pyusd.address,
@@ -1047,14 +1040,14 @@ describe("PyLend - LendingPool", function () {
             });
 
             expect(loan[9]).to.equal(0); // status = ACTIVE
-            expect(loan[2]).to.be.lessThan(parseUnits("1000", PYUSD_DECIMALS)); // borrowedAmount decreased
+            expect(loan[2]).to.be.lessThan(parseUnits("100", PYUSD_DECIMALS)); // borrowedAmount decreased
         });
     });
 
     describe("Interest Rates", function () {
         it("Should calculate utilization rate correctly", async function () {
-            // Alice deposits 10000 PYUSD
-            const depositAmount = parseUnits("10000", PYUSD_DECIMALS);
+            // Alice deposits 100 PYUSD
+            const depositAmount = parseUnits("100", PYUSD_DECIMALS);
             await alice.writeContract({
                 address: pyusd.address,
                 abi: pyusd.abi,
@@ -1068,9 +1061,9 @@ describe("PyLend - LendingPool", function () {
                 args: [depositAmount],
             });
 
-            // Bob borrows 5000 PYUSD
-            const borrowAmount = parseUnits("5000", PYUSD_DECIMALS);
-            const collateral = parseUnits("3", WETH_DECIMALS); // 3 ETH
+            // Bob borrows 100 PYUSD
+            const borrowAmount = parseUnits("100", PYUSD_DECIMALS);
+            const collateral = parseUnits("1", WETH_DECIMALS); // 1 ETH
 
             await bob.writeContract({
                 address: weth.address,
@@ -1085,7 +1078,7 @@ describe("PyLend - LendingPool", function () {
                 args: [borrowAmount, weth.address, collateral],
             });
 
-            // Utilization = 5000 / 10000 = 50%
+            // Utilization = 100 / 200 = 50%
             const utilization = await publicClient.readContract({
                 address: lendingPool.address,
                 abi: lendingPool.abi,
@@ -1096,7 +1089,7 @@ describe("PyLend - LendingPool", function () {
         });
 
         it("Should have higher rates at higher utilization", async function () {
-            const depositAmount = parseUnits("10000", PYUSD_DECIMALS);
+            const depositAmount = parseUnits("100", PYUSD_DECIMALS);
             await alice.writeContract({
                 address: pyusd.address,
                 abi: pyusd.abi,
@@ -1117,8 +1110,8 @@ describe("PyLend - LendingPool", function () {
             });
 
             // Increase utilization
-            const borrowAmount = parseUnits("8000", PYUSD_DECIMALS);
-            const collateral = parseUnits("5", WETH_DECIMALS);
+            const borrowAmount = parseUnits("160", PYUSD_DECIMALS);
+            const collateral = parseUnits("1", WETH_DECIMALS);
 
             await bob.writeContract({
                 address: weth.address,
@@ -1165,43 +1158,35 @@ describe("PyLend - LendingPool", function () {
             expect(config[0]).to.be.true; // isApproved
         });
 
-        it("Should reject non-owner adding collateral", async function () {
-            const newToken = weth.address;
-            const feedId = "0x" + "1".repeat(64) as Hex;
-
-            await expect(
-                alice.writeContract({
-                    address: lendingPool.address,
-                    abi: lendingPool.abi,
-                    functionName: "addCollateral",
-                    args: [newToken, feedId, 16000n, 18],
-                })
-            ).to.be.rejected;
-        });
-
-        it("Should allow owner to pause", async function () {
-            await owner.writeContract({
-                address: lendingPool.address,
-                abi: lendingPool.abi,
-                functionName: "pause",
-            });
-
-            const depositAmount = parseUnits("1000", PYUSD_DECIMALS);
-            await alice.writeContract({
-                address: pyusd.address,
-                abi: pyusd.abi,
-                functionName: "approve",
-                args: [lendingPool.address, depositAmount],
-            });
-
-            await expect(
-                alice.writeContract({
-                    address: lendingPool.address,
-                    abi: lendingPool.abi,
-                    functionName: "deposit",
-                    args: [depositAmount],
-                })
-            ).to.be.rejected;
-        });
+it("Should reject non-owner adding collateral", async function () {
+    const newToken = weth.address;
+    const feedId = "0x" + "1".repeat(64) as Hex;
+    await expect(alice.writeContract({
+        address: lendingPool.address,
+        abi: lendingPool.abi,
+        functionName: "addCollateral",
+        args: [newToken, feedId, 16000n, 18],
+    })).to.be.rejected;
+});
+it("Should allow owner to pause", async function () {
+    await owner.writeContract({
+        address: lendingPool.address,
+        abi: lendingPool.abi,
+        functionName: "pause",
     });
+    const depositAmount = parseUnits("100", PYUSD_DECIMALS);
+    await alice.writeContract({
+        address: pyusd.address,
+        abi: pyusd.abi,
+        functionName: "approve",
+        args: [lendingPool.address, depositAmount],
+    });
+    await expect(alice.writeContract({
+        address: lendingPool.address,
+        abi: lendingPool.abi,
+        functionName: "deposit",
+        args: [depositAmount],
+    })).to.be.rejected;
+});
+});
 });

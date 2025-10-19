@@ -231,7 +231,7 @@ describe("LiquidityPool", function () {
                 address: liquidityPoolContract.address,
                 abi: liquidityPoolContract.abi,
                 functionName: "deposit",
-                args: [mockERC20Contract.address, parseEther("200")],
+                args: [mockERC20Contract.address, parseEther("100")],
             });
         });
 
@@ -447,13 +447,13 @@ describe("LiquidityPool", function () {
                 address: mockERC20Contract.address,
                 abi: mockERC20Contract.abi,
                 functionName: "mint",
-                args: [addr1.account.address, parseEther("200")], // Mint more for repayment
+                args: [addr1.account.address, parseEther("100")], // Mint more for repayment
             });
             await addr1.writeContract({
                 address: mockERC20Contract.address,
                 abi: mockERC20Contract.abi,
                 functionName: "approve",
-                args: [liquidityPoolContract.address, parseEther("200")],
+                args: [liquidityPoolContract.address, parseEther("100")],
             });
         });
 
