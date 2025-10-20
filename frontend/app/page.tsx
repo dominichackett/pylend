@@ -1,23 +1,10 @@
-import Image from "next/image";
+import Header from "./components/Header";
+import Footer from "./components/Footer";
 
 export default function Home() {
   return (
     <div className="text-white font-sans">
-      {/* Header */}
-      <header className="flex justify-between items-center p-4 border-b border-gray-800 bg-black bg-opacity-20">
-        <div className="flex items-center">
-          <Image
-            src="/pylend-logo.svg" // Placeholder for PYLend logo
-            alt="PYLend Logo"
-            width={40}
-            height={40}
-          />
-          <h1 className="text-2xl font-bold ml-2">PYLend</h1>
-        </div>
-        <button className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full">
-          Connect Wallet
-        </button>
-      </header>
+      <Header />
 
       {/* Hero Section */}
       <main className="flex flex-col items-center justify-center min-h-screen text-center p-8">
@@ -57,15 +44,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="bg-black bg-opacity-20 py-8 text-center text-gray-500">
-        <p>&copy; 2025 PYLend. All rights reserved.</p>
-        <div className="flex justify-center space-x-4 mt-4">
-          <a href="#" className="hover:text-white">Twitter</a>
-          <a href="#" className="hover:text-white">Discord</a>
-          <a href="#" className="hover:text-white">Docs</a>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

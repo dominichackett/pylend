@@ -1,0 +1,57 @@
+Core User Screens:
+
+*   **Dashboard:** This would be the main screen for authenticated users. It should provide a summary of their positions, including:
+    *   Total supplied assets (with their current value in USD).
+    *   Total borrowed assets (with their current value in USD).
+    *   Net APY (Annual Percentage Yield) across all supplied and borrowed assets.
+    *   A list of their current loans, showing the collateral, borrowed amount, interest rate, and health factor for each.
+    *   A list of their supplied assets, showing the amount, APY, and current value.
+
+*   **Borrow Page:** A dedicated page for borrowing PYUSD. It should include:
+    *   A form to select the collateral asset from the list of approved collaterals.
+    *   An input for the amount of collateral to supply.
+    *   An input for the amount of PYUSD to borrow.
+    *   A display of the current borrow interest rate (APR).
+    *   A summary of the transaction details, including the health factor of the loan, the liquidation price, and any platform fees.
+    *   A "Borrow" button to initiate the transaction.
+
+*   **Repay Page:** A page for repaying active loans. It should allow users to:
+    *   Select an active loan to repay.
+    *   Enter the amount of PYUSD to repay.
+    *   See the updated loan details after repayment, including the remaining debt and the new health factor.
+    *   A "Repay" button to initiate the transaction.
+
+*   **Supply Page:** A page for users to supply assets to the lending pool to earn interest. It should feature:
+    *   A list of approved assets that can be supplied.
+    *   For each asset, display the current supply APY.
+    *   A form to enter the amount of the asset to supply.
+    *   A "Supply" button to initiate the transaction.
+
+*   **Withdraw Page:** A page for users to withdraw their supplied assets and earned interest. It should allow users to:
+    *   Select a supplied asset to withdraw.
+    *   Enter the amount to withdraw.
+    *   See a summary of the withdrawal, including the principal and the interest earned.
+    *   A "Withdraw" button to initiate the transaction.
+
+Informational Screens:
+
+*   **Markets Page:** A public page that displays information about all the available markets on PYLend. For each asset, it should show:
+    *   Total supplied amount.
+    *   Total borrowed amount.
+    *   Current supply APY.
+    *   Current borrow APR.
+    *   The number of users supplying and borrowing the asset.
+	
+*   **Liquidation Page:** A page dedicated to liquidations. This could be a more advanced feature, but it would be useful for users who want to participate in liquidating under-collateralized loans. It could show:
+    *   A list of all active loans that are eligible for liquidation.
+    *   For each liquidatable loan, display the details, including the collateral, the debt, and the potential profit for the liquidator.
+    *   A "Liquidate" button to initiate the liquidation process.
+
+Admin Screens (for the dApp owner):
+
+*   **Admin Dashboard:** A password-protected area for the dApp owner to manage the lending pool. This would include functionality to:
+    *   Add or remove approved collateral assets.
+    *   Update the liquidation threshold for each asset.
+    *   Set the platform fee.
+    *   Pause or unpause the contract in case of an emergency.
+    *   Withdraw platform fees to the treasury.
