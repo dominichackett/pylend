@@ -24,6 +24,7 @@
     "@nomicfoundation/hardhat-toolbox-viem": "^5.0.0",
     "@openzeppelin/contracts": "^5.4.0",
     "@pythnetwork/pyth-sdk-solidity": "^4.2.0",
+    "axios": "^1.12.2",
     "chai-as-promised": "^8.0.2",
     "dotenv": "^17.2.3"
   },

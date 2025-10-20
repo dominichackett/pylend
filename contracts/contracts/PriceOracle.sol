@@ -130,31 +130,31 @@ contract PriceOracle is Ownable {
      * @param tokenDecimals Token decimals
      * @return USD value with 6 decimals
      */
-    function _calculateValue(
-        uint256 tokenAmount,
-        PythStructs.Price memory price,
-        uint8 tokenDecimals
-    ) internal pure returns (uint256) {
-        // Pyth price format: price × 10^expo
-        // Example: BTC price might be 4500000000000 with expo -8 = $45,000
-        
-        uint256 priceUint = uint256(uint64(price.price));
-        int32 expo = price.expo;
-        
-        // We want result in 6 decimals (PYUSD standard)
-        // Formula: (tokenAmount × price) / (10^tokenDecimals × 10^(-expo)) × 10^6
-        
-        if (expo >= 0) {
-            // Positive expo (rare)
-            uint256 expoMultiplier = 10 ** uint32(expo);
-            return (tokenAmount * priceUint * expoMultiplier * 1e6) / (10 ** tokenDecimals);
-        } else {
-            // Negative expo (common case)
-            uint256 expoDivisor = 10 ** uint32(-expo);
-            return (tokenAmount * priceUint * 1e6) / (10 ** tokenDecimals * expoDivisor);
-        }
-    }
 
+    function _calculateValue(
+    uint256 tokenAmount,
+    PythStructs.Price memory price,
+    uint8 tokenDecimals
+) internal pure returns (uint256) {
+    uint256 priceUint = uint256(uint64(price.price));
+    int32 expo = price.expo;
+    
+    if (expo >= 0) {
+        uint256 expoFactor = 10 ** uint32(expo);
+        // (tokenAmount * priceUint * expoFactor * 1e6) / 10^tokenDecimals
+        // Divide first to be safe
+        return (tokenAmount * priceUint * expoFactor) / (10 ** (tokenDecimals - 6));
+    } else {
+        uint256 expoDivisor = 10 ** uint32(-expo);
+        
+        // BULLETPROOF: Divide the large divisor first
+        uint256 totalDivisor = expoDivisor * (10 ** tokenDecimals);
+        
+        // Then do: (tokenAmount * priceUint * 1e6) / totalDivisor
+        // But even safer: (tokenAmount * priceUint) / totalDivisor * 1e6
+        return ((tokenAmount * priceUint) / totalDivisor) * 1e6;
+    }
+}
     /**
      * @notice Validate price data
      * @param price Pyth price structure
