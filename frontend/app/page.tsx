@@ -2,101 +2,69 @@ import Image from "next/image";
 
 export default function Home() {
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+    <div className="text-white font-sans">
+      {/* Header */}
+      <header className="flex justify-between items-center p-4 border-b border-gray-800 bg-black bg-opacity-20">
+        <div className="flex items-center">
+          <Image
+            src="/pylend-logo.svg" // Placeholder for PYLend logo
+            alt="PYLend Logo"
+            width={40}
+            height={40}
+          />
+          <h1 className="text-2xl font-bold ml-2">PYLend</h1>
         </div>
+        <button className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full">
+          Connect Wallet
+        </button>
+      </header>
+
+      {/* Hero Section */}
+      <main className="flex flex-col items-center justify-center min-h-screen text-center p-8">
+        <h2 className="text-5xl font-bold mb-4" style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.5)' }}>Borrow PYUSD with Your Crypto</h2>
+        <p className="text-lg text-gray-300 mb-8" style={{ textShadow: '1px 1px 2px rgba(0,0,0,0.5)' }}>
+          PYLend is a decentralized lending platform that allows you to borrow PYUSD using your WETH, WBTC, and other approved collateral.
+        </p>
+        <button className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-full text-lg">
+          Borrow Now
+        </button>
       </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
+
+      {/* Features Section */}
+      <section className="py-20 bg-black bg-opacity-20">
+        <div className="container mx-auto px-4">
+          <h3 className="text-3xl font-bold text-center mb-12">Key Features</h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="bg-black bg-opacity-30 p-8 rounded-lg text-center">
+              <h4 className="text-2xl font-bold mb-4">Borrow PYUSD</h4>
+              <p className="text-gray-400">
+                Borrow PYUSD against your crypto assets at competitive interest rates.
+              </p>
+            </div>
+            <div className="bg-black bg-opacity-30 p-8 rounded-lg text-center">
+              <h4 className="text-2xl font-bold mb-4">Supply Collateral</h4>
+              <p className="text-gray-400">
+                Supply your WETH, WBTC, and other approved assets as collateral to earn interest.
+              </p>
+            </div>
+            <div className="bg-black bg-opacity-30 p-8 rounded-lg text-center">
+              <h4 className="text-2xl font-bold mb-4">View Dashboard</h4>
+              <p className="text-gray-400">
+                Track your loans, collateral, and interest rates in our easy-to-use dashboard.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="bg-black bg-opacity-20 py-8 text-center text-gray-500">
+        <p>&copy; 2025 PYLend. All rights reserved.</p>
+        <div className="flex justify-center space-x-4 mt-4">
+          <a href="#" className="hover:text-white">Twitter</a>
+          <a href="#" className="hover:text-white">Discord</a>
+          <a href="#" className="hover:text-white">Docs</a>
+        </div>
       </footer>
     </div>
   );

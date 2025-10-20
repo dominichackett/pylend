@@ -550,43 +550,120 @@ describe("PyLend - LendingPool on Sepolia with Real Pyth Oracle", function () {
             expect(deposit[0]).to.equal(depositAmount);
         });
     });
-});
 
-/*
- * ====================================
- * EFFICIENCY IMPROVEMENTS
- * ====================================
- * 
- * ✅ Contracts deployed ONCE using before() instead of beforeEach()
- * ✅ All tests share the same contract instances
- * ✅ Much faster test execution
- * ✅ Lower gas costs (no repeated deployments)
- * 
- * Deployment time:
- * - beforeEach (old): ~3-5 minutes PER test
- * - before (new): ~3-5 minutes TOTAL
- * 
- * For 10 tests:
- * - Old: 30-50 minutes
- * - New: 5-10 minutes
- * 
- * ====================================
- * TRADE-OFFS
- * ====================================
- * 
- * ✅ Pros:
- * - Much faster
- * - Less gas costs
- * - Easier to debug (contracts don't change)
- * 
- * ⚠️  Cons:
- * - Tests share state (deposits, borrows persist)
- * - Need to be careful about test order
- * - One failing deployment fails all tests
- * 
- * 💡 Best Practice:
- * - Use before() for deployment
- * - Tests should be independent where possible
- * - Clean up state if needed (or accept shared state)
- * 
- */
+    describe("Borrow Functionality", function () {
+        it("Should allow Bob to borrow 30 PYUSD against WETH collateral", async function () {
+            const depositAmount = parseUnits("50", PYUSD_DECIMALS); // Alice deposits 50 PYUSD
+            const collateralAmount = parseUnits("0.05", WETH_DECIMALS); // Bob deposits 0.05 WETH
+            const borrowAmount = parseUnits("30", PYUSD_DECIMALS); // Bob borrows 30 PYUSD
+
+            // 1. Alice deposits PYUSD to provide liquidity
+            console.log("\n\n-- Borrow Test: Alice deposits 50 PYUSD --");
+            const aliceBalance = await publicClient.readContract({
+                address: PYUSD_SEPOLIA,
+                abi: MockERC20Artifact.abi,
+                functionName: "balanceOf",
+                args: [alice.account.address],
+            }) as bigint;
+
+            if (aliceBalance < depositAmount) {
+                console.log("⚠️  Skipping: Alice needs at least 50 PYUSD");
+                this.skip();
+                return;
+            }
+
+            const approveDepositHash = await alice.writeContract({
+                address: PYUSD_SEPOLIA,
+                abi: MockERC20Artifact.abi,
+                functionName: "approve",
+                args: [lendingPool.address, depositAmount],
+            });
+            await publicClient.waitForTransactionReceipt({ hash: approveDepositHash });
+
+            const depositLpHash = await alice.writeContract({
+                address: lendingPool.address,
+                abi: lendingPool.abi,
+                functionName: "deposit",
+                args: [depositAmount],
+            });
+            await publicClient.waitForTransactionReceipt({ hash: depositLpHash });
+            console.log("✅ Alice deposited 50 PYUSD into the pool");
+
+            // 2. Bob borrows 30 PYUSD
+            console.log("\n-- Borrow Test: Bob borrows 30 PYUSD --");
+            const bobBalanceBefore = await publicClient.readContract({
+                address: PYUSD_SEPOLIA,
+                abi: MockERC20Artifact.abi,
+                functionName: "balanceOf",
+                args: [bob.account.address],
+            }) as bigint;
+
+            const borrowHash = await bob.writeContract({
+                address: lendingPool.address,
+                abi: lendingPool.abi,
+                functionName: "borrow",
+                args: [borrowAmount,WETH_SEPOLIA, collateralAmount],
+            });
+            const borrowReceipt = await publicClient.waitForTransactionReceipt({ hash: borrowHash });
+
+            console.log("✅ Bob borrowed 30 PYUSD successfully!");
+            console.log(`🔗 TX: https://sepolia.etherscan.io/tx/${borrowReceipt.transactionHash}`);
+
+            // 3. Verify balances
+            const bobBalanceAfter = await publicClient.readContract({
+                address: PYUSD_SEPOLIA,
+                abi: MockERC20Artifact.abi,
+                functionName: "balanceOf",
+                args: [bob.account.address],
+            }) as bigint;
+
+            expect(bobBalanceAfter).to.gt(bobBalanceBefore);
+        });
+
+        it("Should allow Bob to repay his loan", async function () {
+            const activeLoans = await publicClient.readContract({
+                address: lendingPool.address,
+                abi: lendingPool.abi,
+                functionName: "getUserActiveLoans",
+                args: [bob.account.address],
+            }) as bigint[];
+
+            const loanId = activeLoans[0];
+            const loan = await publicClient.readContract({
+                address: lendingPool.address,
+                abi: lendingPool.abi,
+                functionName: "loans",
+                args: [loanId],
+            }) as any[];
+
+            const borrowedAmount = loan[2];
+
+            // Approve PYUSD spending
+            const approveHash = await bob.writeContract({
+                address: PYUSD_SEPOLIA,
+                abi: MockERC20Artifact.abi,
+                functionName: "approve",
+                args: [lendingPool.address, borrowedAmount],
+            });
+            await publicClient.waitForTransactionReceipt({ hash: approveHash });
+
+            // Repay the loan
+            const repayHash = await bob.writeContract({
+                address: lendingPool.address,
+                abi: lendingPool.abi,
+                functionName: "repay",
+                args: [loanId, borrowedAmount],
+            });
+            await publicClient.waitForTransactionReceipt({ hash: repayHash });
+
+            const activeLoansAfter = await publicClient.readContract({
+                address: lendingPool.address,
+                abi: lendingPool.abi,
+                functionName: "getUserActiveLoans",
+                args: [bob.account.address],
+            }) as bigint[];
+
+            expect(activeLoansAfter.length).to.equal(0);
+        });
+    });
+});
