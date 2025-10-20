@@ -55,7 +55,7 @@ describe("LiquidityPool", function () {
         const mockERC20Hash = await owner.deployContract({
             abi: MockERC20Artifact.abi,
             bytecode: MockERC20Artifact.bytecode as Hex,
-            args: ["TestToken", "TKN"],
+            args: ["TestToken", "TKN", 18],
         });
         const mockERC20Receipt = await publicClient.waitForTransactionReceipt({ hash: mockERC20Hash });
         mockERC20Contract = {
@@ -194,7 +194,7 @@ describe("LiquidityPool", function () {
             const unsupportedTokenHash = await owner.deployContract({
                 abi: MockERC20Artifact.abi,
                 bytecode: MockERC20Artifact.bytecode as Hex,
-                args: ["Unsupported", "UNS"],
+                args: ["Unsupported", "UNS", 18],
             });
             const unsupportedTokenReceipt = await publicClient.waitForTransactionReceipt({ hash: unsupportedTokenHash });
             const unsupportedTokenContract = {
@@ -256,7 +256,7 @@ describe("LiquidityPool", function () {
                 abi: liquidityPoolContract.abi,
                 functionName: "userBalances",
                 args: [addr1.account.address, mockERC20Contract.address],
-            })).to.equal(parseEther("150"));
+            })).to.equal(parseEther("50"));
 
             const assetInfo = await publicClient.readContract({
                 address: liquidityPoolContract.address,
@@ -264,7 +264,7 @@ describe("LiquidityPool", function () {
                 functionName: "assetInformation",
                 args: [mockERC20Contract.address],
             });
-            expect(assetInfo[0]).to.equal(parseEther("150"));
+            expect(assetInfo[0]).to.equal(parseEther("50"));
             expect(await publicClient.readContract({
                 address: mockERC20Contract.address,
                 abi: mockERC20Contract.abi,
@@ -294,7 +294,7 @@ describe("LiquidityPool", function () {
             const unsupportedTokenHash = await owner.deployContract({
                 abi: MockERC20Artifact.abi,
                 bytecode: MockERC20Artifact.bytecode as Hex,
-                args: ["Unsupported", "UNS"],
+                args: ["Unsupported", "UNS", 18],
             });
             const unsupportedTokenReceipt = await publicClient.waitForTransactionReceipt({ hash: unsupportedTokenHash });
             const unsupportedTokenContract = {
@@ -394,7 +394,7 @@ describe("LiquidityPool", function () {
             const unsupportedTokenHash = await owner.deployContract({
                 abi: MockERC20Artifact.abi,
                 bytecode: MockERC20Artifact.bytecode as Hex,
-                args: ["Unsupported", "UNS"],
+                args: ["Unsupported", "UNS", 18],
             });
             const unsupportedTokenReceipt = await publicClient.waitForTransactionReceipt({ hash: unsupportedTokenHash });
             const unsupportedTokenContract = {
@@ -517,7 +517,7 @@ describe("LiquidityPool", function () {
             const unsupportedTokenHash = await owner.deployContract({
                 abi: MockERC20Artifact.abi,
                 bytecode: MockERC20Artifact.bytecode as Hex,
-                args: ["Unsupported", "UNS"],
+                args: ["Unsupported", "UNS", 18],
             });
             const unsupportedTokenReceipt = await publicClient.waitForTransactionReceipt({ hash: unsupportedTokenHash });
             const unsupportedTokenContract = {

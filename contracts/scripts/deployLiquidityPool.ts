@@ -14,12 +14,19 @@ async function main() {
     const liquidityPoolAddress = LiquidityPoolContract.address;
     console.log("LiquidityPool deployed to:", liquidityPoolAddress);
 
-    // TODO: Add a real supported asset (e.g., USDC, WETH) and its corresponding Pyth price feed ID.
-    // Example:
-    // const USDC_ADDRESS = "0x..."; // Replace with actual USDC address on Sepolia
-    // const USDC_PYTH_PRICE_ID = "0x..."; // Replace with actual Pyth price feed ID for USDC
-    // await LiquidityPoolContract.write.addSupportedAsset([USDC_ADDRESS]);
-    // console.log("USDC added as supported asset in LiquidityPool");
+    // Add WETH and PYUSD as supported assets
+    const WETH_TOKEN = process.env.WETH_TOKEN as Hex;
+    const PYUSD_TOKEN = process.env.PYUSD_TOKEN as Hex;
+
+    if (WETH_TOKEN) {
+        await LiquidityPoolContract.write.addSupportedAsset([WETH_TOKEN]);
+        console.log("WETH added as supported asset in LiquidityPool");
+    }
+
+    if (PYUSD_TOKEN) {
+        await LiquidityPoolContract.write.addSupportedAsset([PYUSD_TOKEN]);
+        console.log("PYUSD added as supported asset in LiquidityPool");
+    }
 
     console.log("Deployment complete!");
 }

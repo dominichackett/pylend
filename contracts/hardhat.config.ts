@@ -7,7 +7,7 @@ const config: HardhatUserConfig = {
   networks: {
     sepolia: {
       type:"http",
-      url: process.env.SEPOLIA_RPC_URL || "",
+      url: `https://sepolia.infura.io/v3/${process.env.INFURA_API_KEY}` || "",
       accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },
   },
