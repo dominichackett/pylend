@@ -1,7 +1,19 @@
+'use client';
+
 import Image from "next/image";
 import Link from "next/link";
+import { ConnectButton } from "./ConnectButton";
+import { useAccount } from 'wagmi';
+import { usePathname } from 'next/navigation';
 
 export default function Header() {
+  const { isConnected } = useAccount();
+  const pathname = usePathname();
+
+  const getLinkClass = (href: string) => {
+    return `hover:text-blue-400 ${pathname === href ? 'text-blue-500' : ''}`;
+  };
+
   return (
     <header className="flex justify-between items-center p-4 border-b border-gray-800 bg-black bg-opacity-20">
       <div className="flex items-center">
@@ -16,18 +28,20 @@ export default function Header() {
         </Link>
       </div>
       <nav className="hidden md:flex gap-8">
-        <Link href="/markets" className="hover:text-blue-400">Markets</Link>
-        <Link href="/dashboard" className="hover:text-blue-400">Dashboard</Link>
-        <Link href="/borrow" className="hover:text-blue-400">Borrow</Link>
-        <Link href="/repay" className="hover:text-blue-400">Repay</Link>
-        <Link href="/supply" className="hover:text-blue-400">Supply</Link>
-        <Link href="/withdraw" className="hover:text-blue-400">Withdraw</Link>
-        <Link href="/liquidations" className="hover:text-blue-400">Liquidations</Link>
-        <Link href="/admin" className="hover:text-blue-400">Admin</Link>
+        <Link href="/markets" className={getLinkClass('/markets')}>Markets</Link>
+        {isConnected && (
+          <>
+            <Link href="/dashboard" className={getLinkClass('/dashboard')}>Dashboard</Link>
+            <Link href="/borrow" className={getLinkClass('/borrow')}>Borrow</Link>
+            <Link href="/repay" className={getLinkClass('/repay')}>Repay</Link>
+            <Link href="/supply" className={getLinkClass('/supply')}>Supply</Link>
+            <Link href="/withdraw" className={getLinkClass('/withdraw')}>Withdraw</Link>
+            <Link href="/liquidations" className={getLinkClass('/liquidations')}>Liquidations</Link>
+            <Link href="/admin" className={getLinkClass('/admin')}>Admin</Link>
+          </>
+        )}
       </nav>
-      <button className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full">
-        Connect Wallet
-      </button>
+      <ConnectButton />
     </header>
   );
 }
