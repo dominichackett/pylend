@@ -24,11 +24,11 @@ const markets = [
 
 export default function Markets() {
   return (
-    <div className="text-white font-sans">
+    <div className="font-sans flex flex-col flex-grow min-h-screen">
       <Header />
 
       {/* Markets Table */}
-      <main className="container mx-auto px-4 py-10">
+      <main className="container mx-auto px-4 py-10 flex-grow">
         <h2 className="text-3xl font-bold mb-8 text-center">Markets</h2>
         <div className="overflow-x-auto">
           <table className="min-w-full bg-black bg-opacity-30 rounded-lg">
@@ -42,7 +42,7 @@ export default function Markets() {
                 <th className="p-4"></th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="text-white">
               {markets.map((market) => (
                 <tr key={market.asset} className="border-b border-gray-800 hover:bg-black hover:bg-opacity-20">
                   <td className="p-4 flex items-center">
@@ -51,7 +51,7 @@ export default function Markets() {
                       alt={`${market.asset} logo`}
                       width={32}
                       height={32}
-                      className="mr-4"
+                      className="mr-4 invert"
                     />
                     {market.asset}
                   </td>

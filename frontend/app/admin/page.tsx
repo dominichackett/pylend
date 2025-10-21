@@ -3,15 +3,14 @@ import Footer from "../components/Footer";
 
 export default function Admin() {
   return (
-    <div className="text-white font-sans">
+    <div className="font-sans flex flex-col flex-grow min-h-screen">
       <Header />
 
-      <main className="container mx-auto px-4 py-10">
+      <main className="container mx-auto px-4 py-10 flex-grow">
         <h2 className="text-3xl font-bold mb-8 text-center">Admin Dashboard</h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {/* Add New Collateral */}
-          <div className="bg-black bg-opacity-30 p-8 rounded-lg">
+          <div className="bg-black bg-opacity-30 p-8 rounded-lg text-white">
             <h3 className="text-2xl font-bold mb-4">Add New Collateral</h3>
             <form>
               <div className="mb-4">
@@ -30,8 +29,7 @@ export default function Admin() {
             </form>
           </div>
 
-          {/* Contract Settings */}
-          <div className="bg-black bg-opacity-30 p-8 rounded-lg">
+          <div className="bg-black bg-opacity-30 p-8 rounded-lg text-white">
             <h3 className="text-2xl font-bold mb-4">Contract Settings</h3>
             <form>
               <div className="mb-4">

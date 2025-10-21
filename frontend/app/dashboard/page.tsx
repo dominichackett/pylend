@@ -37,15 +37,14 @@ const myLoans = [
 
 export default function Dashboard() {
   return (
-    <div className="text-white font-sans">
+    <div className="font-sans flex flex-col flex-grow min-h-screen">
       <Header />
 
-      <main className="container mx-auto px-4 py-10">
+      <main className="container mx-auto px-4 py-10 flex-grow">
         <h2 className="text-3xl font-bold mb-8 text-center">My Dashboard</h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-          {/* Supplied Assets */}
-          <div className="bg-black bg-opacity-30 p-8 rounded-lg">
+          <div className="bg-black bg-opacity-30 p-8 rounded-lg text-white">
             <h3 className="text-2xl font-bold mb-4">Supplied Assets</h3>
             <table className="min-w-full">
               <thead>
@@ -56,7 +55,7 @@ export default function Dashboard() {
                   <th className="p-4">Value</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="text-white">
                 {suppliedAssets.map((asset) => (
                   <tr key={asset.asset} className="border-b border-gray-800">
                     <td className="p-4">{asset.asset}</td>
@@ -69,8 +68,7 @@ export default function Dashboard() {
             </table>
           </div>
 
-          {/* Borrowed Assets */}
-          <div className="bg-black bg-opacity-30 p-8 rounded-lg">
+          <div className="bg-black bg-opacity-30 p-8 rounded-lg text-white">
             <h3 className="text-2xl font-bold mb-4">Borrowed Assets</h3>
             <table className="min-w-full">
               <thead>
@@ -81,7 +79,7 @@ export default function Dashboard() {
                   <th className="p-4">Value</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="text-white">
                 {borrowedAssets.map((asset) => (
                   <tr key={asset.asset} className="border-b border-gray-800">
                     <td className="p-4">{asset.asset}</td>
@@ -95,8 +93,7 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* My Loans */}
-        <div className="bg-black bg-opacity-30 p-8 rounded-lg">
+        <div className="bg-black bg-opacity-30 p-8 rounded-lg text-white">
           <h3 className="text-2xl font-bold mb-4">My Loans</h3>
           <table className="min-w-full">
             <thead>
@@ -109,7 +106,7 @@ export default function Dashboard() {
                 <th className="p-4"></th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="text-white">
               {myLoans.map((loan) => (
                 <tr key={loan.loanId} className="border-b border-gray-800">
                   <td className="p-4">{loan.loanId}</td>

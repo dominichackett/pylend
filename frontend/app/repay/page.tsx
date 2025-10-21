@@ -3,13 +3,13 @@ import Footer from "../components/Footer";
 
 export default function Repay() {
   return (
-    <div className="text-white font-sans">
+    <div className="font-sans flex flex-col flex-grow min-h-screen">
       <Header />
 
-      <main className="container mx-auto px-4 py-10">
+      <main className="container mx-auto px-4 py-10 flex-grow">
         <h2 className="text-3xl font-bold mb-8 text-center">Repay Loan</h2>
 
-        <div className="max-w-lg mx-auto bg-black bg-opacity-30 p-8 rounded-lg">
+        <div className="max-w-lg mx-auto bg-black bg-opacity-30 p-8 rounded-lg text-white">
           <form>
             <div className="mb-4">
               <label htmlFor="loan" className="block text-gray-400 mb-2">Select Loan to Repay</label>

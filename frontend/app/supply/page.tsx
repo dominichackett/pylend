@@ -3,13 +3,13 @@ import Footer from "../components/Footer";
 
 export default function Supply() {
   return (
-    <div className="text-white font-sans">
+    <div className="font-sans flex flex-col flex-grow min-h-screen">
       <Header />
 
-      <main className="container mx-auto px-4 py-10">
+      <main className="container mx-auto px-4 py-10 flex-grow">
         <h2 className="text-3xl font-bold mb-8 text-center">Supply Assets</h2>
 
-        <div className="max-w-lg mx-auto bg-black bg-opacity-30 p-8 rounded-lg">
+        <div className="max-w-lg mx-auto bg-black bg-opacity-30 p-8 rounded-lg text-white">
           <form>
             <div className="mb-4">
               <label htmlFor="supplyAsset" className="block text-gray-400 mb-2">Select Asset to Supply</label>

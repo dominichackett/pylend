@@ -24,11 +24,11 @@ const liquidations = [
 
 export default function Liquidations() {
   return (
-    <div className="text-white font-sans">
+    <div className="font-sans flex flex-col flex-grow min-h-screen">
       <Header />
 
       {/* Liquidations Table */}
-      <main className="container mx-auto px-4 py-10">
+      <main className="container mx-auto px-4 py-10 flex-grow">
         <h2 className="text-3xl font-bold mb-8 text-center">Liquidations</h2>
         <div className="overflow-x-auto">
           <table className="min-w-full bg-black bg-opacity-30 rounded-lg">
@@ -43,7 +43,7 @@ export default function Liquidations() {
                 <th className="p-4"></th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="text-white">
               {liquidations.map((liquidation) => (
                 <tr key={liquidation.loanId} className="border-b border-gray-800 hover:bg-black hover:bg-opacity-20">
                   <td className="p-4">{liquidation.loanId}</td>

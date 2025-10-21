@@ -11,11 +11,10 @@ export default function Header() {
   const pathname = usePathname();
 
   const getLinkClass = (href: string) => {
-    return `hover:text-blue-400 ${pathname === href ? 'text-blue-500' : ''}`;
-  };
+    return `hover:text-blue-400 ${pathname === href ? 'bg-blue-700 bg-opacity-30 px-3 py-1 rounded-md font-bold text-blue-300' : ''}`;  };
 
   return (
-    <header className="flex justify-between items-center p-4 border-b border-gray-800 bg-black bg-opacity-20">
+    <header className="flex justify-between items-center p-4 border-b border-gray-800 bg-black bg-opacity-20 text-white">
       <div className="flex items-center">
         <Link href="/" className="flex items-center">
           <Image
