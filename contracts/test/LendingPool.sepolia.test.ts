@@ -598,6 +598,18 @@ describe("PyLend - LendingPool on Sepolia with Real Pyth Oracle", function () {
                 args: [bob.account.address],
             }) as bigint;
 
+            // Bob must approve the LendingPool to use his WETH as collateral
+          console.log("-- Bob approving WETH collateral --");
+     const approveWethHash = await bob.writeContract({
+    address: WETH_SEPOLIA,
+    abi: MockERC20Artifact.abi,
+    functionName: "approve",
+    args: [lendingPool.address, collateralAmount],
+});
+await publicClient.waitForTransactionReceipt({ hash: approveWethHash });
+console.log("✅ Bob approved WETH collateral");
+
+
             const borrowHash = await bob.writeContract({
                 address: lendingPool.address,
                 abi: lendingPool.abi,
