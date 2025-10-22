@@ -16,6 +16,19 @@ const ERC20_ABI = [
     ],
     "stateMutability": "view",
     "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "decimals",
+    "outputs": [
+      {
+        "internalType": "uint8",
+        "name": "",
+        "type": "uint8"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
   }
 ];
 
@@ -59,6 +72,7 @@ export async function GET(req: NextRequest) {
       collateralAddedEvents.map(async (event: any) => {
         const tokenAddress = event.token as Address;
         let symbol = "Unknown";
+        let decimals = 18; // Default to 18 if unable to fetch
 
         try {
           symbol = await publicClient.readContract({
@@ -66,8 +80,13 @@ export async function GET(req: NextRequest) {
             abi: ERC20_ABI,
             functionName: "symbol",
           });
+          decimals = await publicClient.readContract({
+            address: tokenAddress,
+            abi: ERC20_ABI,
+            functionName: "decimals",
+          });
         } catch (erc20Error) {
-          console.warn(`Could not fetch symbol for token ${tokenAddress}:`, erc20Error);
+          console.warn(`Could not fetch symbol or decimals for token ${tokenAddress}:`, erc20Error);
         }
 
         return {
@@ -75,6 +94,7 @@ export async function GET(req: NextRequest) {
           symbol: symbol,
           threshold: event.threshold,
           priceFeedId: event.priceFeedId,
+          decimals: decimals,
         };
       })
     );
