@@ -8,7 +8,7 @@ const config = createConfig({
   chains: [mainnet, sepolia],
   transports: {
     [mainnet.id]: http(),
-    [sepolia.id]: http(),
+    [sepolia.id]: http(process.env.NEXT_PUBLIC_SEPOLIA_RPC_URL),
   },
 });
 
