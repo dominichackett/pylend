@@ -74,6 +74,7 @@ export async function GET(req: NextRequest) {
           token: tokenAddress,
           symbol: symbol,
           threshold: event.threshold,
+          priceFeedId: event.priceFeedId,
         };
       })
     );
