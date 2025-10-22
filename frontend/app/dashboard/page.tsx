@@ -23,7 +23,6 @@ interface LoanData {
   priceFeedId?: string;
   collateralDecimals?: number;
   liquidationThreshold?: number; // In basis points, e.g., 15000 for 150%
-  currentPrice?: number;
   healthFactor?: number;
 }
 
@@ -40,10 +39,16 @@ export default function Dashboard() {
   const [loans, setLoans] = useState<LoanData[]>([]);
   const [tokenSymbols, setTokenSymbols] = useState<Record<string, string>>({});
   const [tokenInfoMap, setTokenInfoMap] = useState<Record<string, TokenInfo>>({});
-  
+  const [priceFeedData, setPriceFeedData] = useState<Record<string, number>>({}); // priceFeedId -> price
+  const prevPriceFeedDataRef = useRef<Record<string, number>>({}); // priceFeedId -> previous price
   
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Effect to update prevPriceFeedDataRef after priceFeedData changes
+  useEffect(() => {
+    prevPriceFeedDataRef.current = priceFeedData;
+  }, [priceFeedData]);
 
   // Initialize Viem public client for fetching token decimals
   const publicClient = React.useMemo(() => createPublicClient({
@@ -151,12 +156,15 @@ export default function Dashboard() {
           const priceId = `0x${priceFeed.id}`;
           const price = Number(formatUnits(BigInt(priceFeed.price.price), Math.abs(priceFeed.price.expo))); // Convert raw price to number
 
+          setPriceFeedData(prevPriceFeedData => ({
+            ...prevPriceFeedData,
+            [priceId]: price,
+          }));
+
           setLoans(prevLoans => 
             prevLoans.map(loan => {
               if (loan.priceFeedId === priceId) {
-                const currentPrice = price;
-                const healthFactor = calculateHealthFactor(loan, currentPrice);
-                return { ...loan, currentPrice, healthFactor };
+                return { ...loan };
               }
               return loan;
             })
@@ -292,6 +300,8 @@ export default function Dashboard() {
                         key={loan.loanId}
                         loan={loan}
                         collateralSymbol={collateralSymbol}
+                        priceFeedData={priceFeedData}
+                        prevPriceFeedDataRef={prevPriceFeedDataRef}
                       />
                     );
                   })

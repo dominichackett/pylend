@@ -1,9 +1,10 @@
 'use client'
+import { HermesClient } from "@pythnetwork/hermes-client";
 import { useState, useEffect, useRef, useCallback } from "react";
 import React from "react";
 import { formatUnits, createPublicClient, http, Address } from "viem";
 import { sepolia } from 'viem/chains';
-import { HermesClient } from "@pythnetwork/hermes-client";
+
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import Image from "next/image";
@@ -18,9 +19,12 @@ interface TokenInfo {
 
 export default function Markets() {
   const [approvedCollateral, setApprovedCollateral] = useState<TokenInfo[]>([]);
+  const [tokenInfoMap, setTokenInfoMap] = useState<Record<string, TokenInfo>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [priceFeedData, setPriceFeedData] = useState<Record<string, number>>({}); // priceFeedId -> price
+  const prevPriceFeedDataRef = useRef<Record<string, number>>({}); // priceFeedId -> previous price
+  const eventSourceRef = useRef<EventSource | null>(null);
 
   // Initialize Viem public client for fetching token decimals
   const publicClient = React.useMemo(() => createPublicClient({
@@ -45,25 +49,22 @@ export default function Markets() {
     }
   ];
 
-  const eventSourceRef = useRef<EventSource | null>(null);
-
-  const calculateHealthFactor = useCallback((loan: any, currentPrice: number) => {
-    // This function is not directly used on the Markets page for display,
-    // but is included for completeness if needed for future features.
-    // Placeholder implementation for now.
-    return 0;
-  }, []);
+  // Effect to update prevPriceFeedDataRef after priceFeedData changes
+  useEffect(() => {
+    prevPriceFeedDataRef.current = priceFeedData;
+  }, [priceFeedData]);
 
   // Effect to subscribe to Pyth price feeds
   useEffect(() => {
-    if (approvedCollateral.length === 0) return;
+    if (Object.keys(tokenInfoMap).length === 0) return;
 
     const setupPythStream = async () => {
       const hermesClient = new HermesClient("https://hermes.pyth.network");
 
-      const priceIdsRaw = approvedCollateral.map(info => info.priceFeedId);
+      const priceIdsRaw = Object.values(tokenInfoMap).map(info => info.priceFeedId);
       const priceIds = Array.from(new Set(priceIdsRaw.filter(id => typeof id === 'string' && id !== null)));
 
+      // Ensure priceIds are correctly formatted for subscription (remove 0x prefix)
       const formattedPriceIds = priceIds.map(id => id.startsWith("0x") ? id.substring(2) : id);
 
       if (formattedPriceIds.length === 0) return;
@@ -75,8 +76,12 @@ export default function Markets() {
         const data = JSON.parse(event.data);
         data.parsed.forEach((priceFeed: any) => {
           const priceId = `0x${priceFeed.id}`;
-          const price = Number(formatUnits(BigInt(priceFeed.price.price), Math.abs(priceFeed.price.expo)));
-          setPriceFeedData(prev => ({ ...prev, [priceId]: price }));
+          const price = Number(formatUnits(BigInt(priceFeed.price.price), Math.abs(priceFeed.price.expo))); // Convert raw price to number
+
+          setPriceFeedData(prevPriceFeedData => ({
+            ...prevPriceFeedData,
+            [priceId]: price,
+          }));
         });
       };
 
@@ -93,7 +98,11 @@ export default function Markets() {
         eventSourceRef.current.close();
       }
     };
-  }, [approvedCollateral]);
+  }, [tokenInfoMap]);
+
+
+
+
 
   useEffect(() => {
     const fetchApprovedCollateral = async () => {
@@ -104,7 +113,26 @@ export default function Markets() {
           throw new Error('Failed to fetch approved collateral');
         }
         const data: TokenInfo[] = await response.json();
+        const infoMap: Record<string, TokenInfo> = {};
+
+        for (const tokenData of data) {
+          let decimals = tokenData.decimals;
+          if (decimals === undefined) {
+            try {
+              decimals = await publicClient.readContract({
+                address: tokenData.token as Address,
+                abi: ERC20_ABI_DECIMALS,
+                functionName: "decimals",
+              });
+            } catch (decimalError) {
+              console.warn(`Could not fetch decimals for token ${tokenData.token}:`, decimalError);
+              decimals = 18; // Default to 18 if unable to fetch
+            }
+          }
+          infoMap[tokenData.token.toLowerCase()] = { ...tokenData, decimals, priceFeedId: tokenData.priceFeedId };
+        }
         setApprovedCollateral(data);
+        setTokenInfoMap(infoMap);
       } catch (err: any) {
         console.error("Error fetching approved collateral:", err);
         setError(err.message);
@@ -169,7 +197,30 @@ export default function Markets() {
                       {tokenInfo.symbol}
                     </td>
                     <td className="p-4">{tokenInfo.threshold / 100}%</td>
-                    <td className="p-4">{priceFeedData[tokenInfo.priceFeedId] !== undefined ? `$${priceFeedData[tokenInfo.priceFeedId].toFixed(2)}` : "Loading..."}</td>
+                    <td className="p-4">
+                      {priceFeedData[tokenInfo.priceFeedId] !== undefined ? (
+                        (() => {
+                          const currentPrice = priceFeedData[tokenInfo.priceFeedId];
+                          const prevPrice = prevPriceFeedDataRef.current[tokenInfo.priceFeedId];
+                          let priceColorClass = "text-white"; // Default color
+
+                          if (prevPrice !== undefined) {
+                            const currentPriceString = currentPrice.toFixed(2);
+                            const prevPriceString = prevPrice.toFixed(2);
+
+                            if (currentPriceString > prevPriceString) {
+                              priceColorClass = "text-green-500"; // Price increased
+                            } else if (currentPriceString < prevPriceString) {
+                              priceColorClass = "text-red-500"; // Price decreased
+                            }
+                          }
+
+                          return <span className={priceColorClass}>${currentPrice.toFixed(2)}</span>;
+                        })()
+                      ) : (
+                        "Loading..."
+                      )}
+                    </td>
                     <td className="p-4">
                       <button className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full">
                         Details
