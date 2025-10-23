@@ -3,7 +3,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { usePublicClient, useAccount, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
 import { formatUnits, parseUnits, Address } from "viem";
 import { HermesClient } from "@pythnetwork/hermes-client";
-import { LendingPoolABI, lendingPoolAddress } from "../../lib/contracts";
+import { lendingPoolABI, lendingPoolAddress } from "../../lib/contracts";
 import { erc20ABI } from "../../lib/erc20";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
@@ -218,7 +218,7 @@ export default function Borrow() {
         try {
           const rate = await publicClient.readContract({
             address: lendingPoolAddress,
-            abi: LendingPoolABI,
+            abi: lendingPoolABI,
             functionName: "getCurrentBorrowRate",
           });
           setBorrowAPY(Number(formatUnits(rate as bigint, 18)).toFixed(4));
@@ -262,7 +262,7 @@ export default function Borrow() {
 
     writeContract({
       address: lendingPoolAddress,
-      abi: LendingPoolABI,
+      abi: lendingPoolABI,
       functionName: 'borrow',
       args: [borrowAmount, selectedCollateralToken as Address, collateralAmount],
     });
@@ -308,7 +308,7 @@ export default function Borrow() {
 
         const maxAmount = await publicClient.readContract({
           address: lendingPoolAddress,
-          abi: LendingPoolABI,
+          abi: lendingPoolABI,
           functionName: "getMaxBorrowAmount",
           args: [selectedCollateralToken as Address, collateralAmountBigInt],
         });

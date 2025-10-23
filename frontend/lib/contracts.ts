@@ -2,7 +2,7 @@ import { Address } from "viem";
 
 export const lendingPoolAddress: Address = "0x8e1207975db83b7f6ebdeef66e7693da07dfc123";
 
-export const LendingPoolABI = [{
+export const lendingPoolABI = [{
     "inputs": [
         {
             "internalType": "address",

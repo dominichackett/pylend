@@ -41,7 +41,8 @@ Informational Screens:
     *   Current supply APY.
     *   Current borrow APR.
     *   The number of users supplying and borrowing the asset.
-	
+    *   The data on this page is fetched from a GraphQL endpoint that indexes events from the smart contracts. This provides a scalable and efficient way to display market data.
+
 *   **Liquidation Page:** A page dedicated to liquidations. This could be a more advanced feature, but it would be useful for users who want to participate in liquidating under-collateralized loans. It could show:
     *   A list of all active loans that are eligible for liquidation.
     *   For each liquidatable loan, display the details, including the collateral, the debt, and the potential profit for the liquidator.

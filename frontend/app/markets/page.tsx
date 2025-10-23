@@ -8,6 +8,7 @@ import { sepolia } from 'viem/chains';
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import Image from "next/image";
+import Stats from "../components/Stats";
 
 interface TokenInfo {
   token: string;
@@ -173,6 +174,7 @@ export default function Markets() {
 
       {/* Markets Table */}
       <main className="container mx-auto px-4 py-10 flex-grow">
+        <Stats />
         <h2 className="text-3xl font-bold mb-8 text-center">Approved Collateral Markets</h2>
         <div className="overflow-x-auto">
           <table className="min-w-full bg-black bg-opacity-30 rounded-lg">
