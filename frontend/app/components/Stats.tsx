@@ -54,11 +54,11 @@ const Stats = () => {
           }),
         ]);
 
-        setTotalLiquidity(formatUnits(liquidity as bigint, 18));
-        setTotalBorrowed(formatUnits(borrowed as bigint, 18));
-        setTotalBadDebt(formatUnits(badDebt as bigint, 18));
+        setTotalLiquidity(formatUnits(liquidity as bigint, 6));
+        setTotalBorrowed(formatUnits(borrowed as bigint, 6));
+        setTotalBadDebt(formatUnits(badDebt as bigint, 6));
         setLoanCount((loans as bigint).toString());
-        setBorrowRate(formatUnits(rate as bigint, 18));
+        setBorrowRate(rate.toString());
       } catch (error) {
         console.error("Error fetching stats:", error);
       }
@@ -87,7 +87,7 @@ const Stats = () => {
       </div>
       <div className="bg-black bg-opacity-30 p-4 rounded-lg text-center">
         <h3 className="text-gray-400">Current Borrow Rate</h3>
-        <p className="text-2xl font-bold">{parseFloat(borrowRate).toFixed(2)}%</p>
+        <p className="text-2xl font-bold">{(parseFloat(borrowRate) / 100).toFixed(2)}%</p>
       </div>
     </div>
   );

@@ -221,7 +221,8 @@ export default function Borrow() {
             abi: lendingPoolABI,
             functionName: "getCurrentBorrowRate",
           });
-          setBorrowAPY(Number(formatUnits(rate as bigint, 18)).toFixed(4));
+          console.log(rate)
+          setBorrowAPY(Number(rate).toFixed(2)/100);
         } catch (contractError: any) {
           console.error("Error calling getCurrentBorrowRate:", contractError);
           console.error("Lending Pool Address:", lendingPoolAddress);
@@ -413,7 +414,7 @@ export default function Borrow() {
               <h4 className="text-xl font-bold mb-2">Transaction Summary</h4>
               <div className="flex justify-between">
                 <p className="text-gray-400">Borrow APY:</p>
-                <p>{borrowAPY !== null ? `${(parseFloat(borrowAPY) * 100).toFixed(2)}%` : "Loading..."}</p>
+                <p>{borrowAPY !== null ? `${borrowAPY}%` : "Loading..."}</p>
               </div>
               <div className="flex justify-between">
                 <p className="text-gray-400">Health Factor:</p>

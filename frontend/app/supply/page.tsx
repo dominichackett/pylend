@@ -38,7 +38,7 @@ export default function Supply() {
         abi: lendingPoolABI,
         functionName: "getCurrentSupplyRate",
       });
-      setSupplyAPY(Number(formatUnits(rate as bigint, 18)).toFixed(4));
+      setSupplyAPY(Number(rate)/10000);
     } catch (contractError: any) {
       console.error("Error calling getCurrentSupplyRate:", contractError);
       setSupplyAPY(null);

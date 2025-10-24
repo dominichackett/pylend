@@ -6,7 +6,7 @@ import { parseEther, formatEther, pad, toHex } from "viem";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 
-import { LendingPoolABI, lendingPoolAddress } from "../../lib/contracts";
+import { lendingPoolABI, lendingPoolAddress } from "../../lib/contracts";
 
 export default function Admin() {
   const { address } = useAccount();
@@ -20,13 +20,13 @@ export default function Admin() {
 
   const { data: paused, refetch: refetchPaused } = useReadContract({
     address: lendingPoolAddress,
-    abi: LendingPoolABI,
+    abi: lendingPoolABI,
     functionName: "paused",
   });
   console.log("Paused Status:", paused);
   const { data: currentPlatformFee, refetch: refetchPlatformFee } = useReadContract({
     address: lendingPoolAddress,
-    abi: LendingPoolABI,
+    abi: lendingPoolABI,
     functionName: "platformFee",
   });
   console.log("Current Platform Fee:", currentPlatformFee);
@@ -39,7 +39,7 @@ export default function Admin() {
     e.preventDefault();
     await writeContractAsync({
       address: lendingPoolAddress,
-      abi: LendingPoolABI,
+      abi: lendingPoolABI,
       functionName: "addCollateral",
       args: [tokenAddress, priceFeedId, BigInt(Number(liquidationThreshold) * 100), Number(decimals)],
     });
@@ -49,7 +49,7 @@ export default function Admin() {
     e.preventDefault();
     await writeContractAsync({
       address: lendingPoolAddress,
-      abi: LendingPoolABI,
+      abi: lendingPoolABI,
       functionName: "setPlatformFee",
       args: [BigInt(newPlatformFee)],
     });
@@ -58,7 +58,7 @@ export default function Admin() {
   const handlePause = async () => {
     await writeContractAsync({
       address: lendingPoolAddress,
-      abi: LendingPoolABI,
+      abi: lendingPoolABI,
       functionName: "pause",
     });
   };
@@ -66,7 +66,7 @@ export default function Admin() {
   const handleUnpause = async () => {
     await writeContractAsync({
       address: lendingPoolAddress,
-      abi: LendingPoolABI,
+      abi: lendingPoolABI,
       functionName: "unpause",
     });
   };
