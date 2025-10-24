@@ -4,9 +4,10 @@ import { useState, useEffect, useCallback } from "react";
 import { useAccount, useBalance, useWriteContract, useWaitForTransactionReceipt, usePublicClient } from "wagmi";
 import { formatUnits, parseUnits, Address } from "viem";
 import { lendingPoolABI, lendingPoolAddress } from "../../lib/contracts";
-import { erc20ABI } from "../../lib/erc20";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
+import { erc20ABI } from "../../lib/erc20";
+import AlertDialog from "../components/AlertDialog";
 
 const PYUSD_CONTRACT_ADDRESS: Address = "0xCaC524BcA292aaade2DF8A05cC58F0a65B1B3bB9"; // PYUSD Contract Address
 
@@ -28,6 +29,20 @@ export default function Supply() {
   const [supplyAPY, setSupplyAPY] = useState<string | null>(null);
   const [totalDepositWithInterest, setTotalDepositWithInterest] = useState<number | null>(null);
   const [allowance, setAllowance] = useState<bigint>(BigInt(0));
+
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [dialogTitle, setDialogTitle] = useState("");
+  const [dialogMessage, setDialogMessage] = useState("");
+
+  const openDialog = (title: string, message: string) => {
+    setDialogTitle(title);
+    setDialogMessage(message);
+    setIsDialogOpen(true);
+  };
+
+  const closeDialog = () => {
+    setIsDialogOpen(false);
+  };
 
   const fetchSupplyAPY = useCallback(async () => {
     console.log("fetchSupplyAPY, publicClient:", publicClient);
@@ -134,8 +149,8 @@ export default function Supply() {
         functionName: 'approve',
         args: [lendingPoolAddress, amountToApprove],
       });
-    } catch (err) {
-      console.error("Error initiating approve transaction:", err);
+    } catch (err: any) {
+      openDialog("Error", getShortErrorMessage(err.message));
     }
   };
 
@@ -151,8 +166,8 @@ export default function Supply() {
         functionName: 'deposit',
         args: [ amountToSupply],
       });
-    } catch (err) {
-      console.error("Error initiating deposit transaction:", err);
+    } catch (err: any) {
+      openDialog("Error", getShortErrorMessage(err.message));
     }
   };
 
@@ -225,12 +240,18 @@ export default function Supply() {
             {isPending && <div className="text-center mt-4">Transaction in progress...</div>}
             {isConfirming && <div className="text-center mt-4">Waiting for confirmation...</div>}
             {isConfirmed && <div className="text-center mt-4 text-green-500">Transaction successful!</div>}
-            {writeError && <div className="text-center mt-4 text-red-500">Error: {writeError.message}</div>}
+            
           </form>
         </div>
       </main>
 
       <Footer />
+      <AlertDialog
+        isOpen={isDialogOpen}
+        onClose={closeDialog}
+        title={dialogTitle}
+        message={dialogMessage}
+      />
     </div>
   );
 }

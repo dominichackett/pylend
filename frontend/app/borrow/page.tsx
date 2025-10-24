@@ -7,6 +7,7 @@ import { lendingPoolABI, lendingPoolAddress } from "../../lib/contracts";
 import { erc20ABI } from "../../lib/erc20";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
+import AlertDialog from "../components/AlertDialog";
 
 interface TokenInfo {
   token: string;
@@ -37,6 +38,20 @@ export default function Borrow() {
   const [liquidationPrice, setLiquidationPrice] = useState<string | null>(null);
   const [collateralBalance, setCollateralBalance] = useState<string | null>(null);
   const [isApproved, setIsApproved] = useState(false);
+
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [dialogTitle, setDialogTitle] = useState("");
+  const [dialogMessage, setDialogMessage] = useState("");
+
+  const openDialog = (title: string, message: string) => {
+    setDialogTitle(title);
+    setDialogMessage(message);
+    setIsDialogOpen(true);
+  };
+
+  const closeDialog = () => {
+    setIsDialogOpen(false);
+  };
 
   // Effect to update prevPriceFeedDataRef after priceFeedData changes
   useEffect(() => {
@@ -246,12 +261,16 @@ export default function Borrow() {
 
     const amountToApprove = parseUnits(collateralAmountInput, collateralTokenInfo.decimals);
 
-    writeContract({
-      address: selectedCollateralToken as Address,
-      abi: erc20ABI,
-      functionName: 'approve',
-      args: [lendingPoolAddress, amountToApprove],
-    });
+    try {
+      writeContract({
+        address: selectedCollateralToken as Address,
+        abi: erc20ABI,
+        functionName: 'approve',
+        args: [lendingPoolAddress, amountToApprove],
+      });
+    } catch (err: any) {
+      openDialog("Error", getShortErrorMessage(err.message));
+    }
   };
 
   const handleBorrow = async () => {
@@ -261,12 +280,16 @@ export default function Borrow() {
     const collateralAmount = parseUnits(collateralAmountInput, collateralTokenInfo.decimals);
     const borrowAmount = parseUnits(borrowAmountInput, 6); // PYUSD has 6 decimals
 
-    writeContract({
-      address: lendingPoolAddress,
-      abi: lendingPoolABI,
-      functionName: 'borrow',
-      args: [borrowAmount, selectedCollateralToken as Address, collateralAmount],
-    });
+    try {
+      writeContract({
+        address: lendingPoolAddress,
+        abi: lendingPoolABI,
+        functionName: 'borrow',
+        args: [borrowAmount, selectedCollateralToken as Address, collateralAmount],
+      });
+    } catch (err: any) {
+      openDialog("Error", getShortErrorMessage(err.message));
+    }
   };
 
   useEffect(() => {
@@ -450,12 +473,18 @@ export default function Borrow() {
             {isPending && <div className="text-center mt-4">Transaction in progress...</div>}
             {isConfirming && <div className="text-center mt-4">Waiting for confirmation...</div>}
             {isConfirmed && <div className="text-center mt-4 text-green-500">Transaction successful!</div>}
-            {writeError && <div className="text-center mt-4 text-red-500">Error: {writeError.message}</div>}
+            
 
         </div>
       </main>
 
       <Footer />
+      <AlertDialog
+        isOpen={isDialogOpen}
+        onClose={closeDialog}
+        title={dialogTitle}
+        message={dialogMessage}
+      />
     </div>
   );
 }

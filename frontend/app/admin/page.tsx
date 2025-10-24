@@ -6,7 +6,8 @@ import { parseEther, formatEther, pad, toHex } from "viem";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 
-import { lendingPoolABI, lendingPoolAddress } from "../../lib/contracts";
+import AlertDialog from "../components/AlertDialog";
+import { lendingPoolAddress, lendingPoolABI } from "../../lib/contracts";
 
 export default function Admin() {
   const { address } = useAccount();
@@ -17,6 +18,20 @@ export default function Admin() {
   const [liquidationThreshold, setLiquidationThreshold] = useState("");
   const [decimals, setDecimals] = useState("");
   const [newPlatformFee, setNewPlatformFee] = useState("");
+
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [dialogTitle, setDialogTitle] = useState("");
+  const [dialogMessage, setDialogMessage] = useState("");
+
+  const openDialog = (title: string, message: string) => {
+    setDialogTitle(title);
+    setDialogMessage(message);
+    setIsDialogOpen(true);
+  };
+
+  const closeDialog = () => {
+    setIsDialogOpen(false);
+  };
 
   const { data: paused, refetch: refetchPaused } = useReadContract({
     address: lendingPoolAddress,
@@ -37,38 +52,58 @@ export default function Admin() {
   }, [refetchPaused, refetchPlatformFee, paused, currentPlatformFee]);
   const handleAddCollateral = async (e: React.FormEvent) => {
     e.preventDefault();
-    await writeContractAsync({
-      address: lendingPoolAddress,
-      abi: lendingPoolABI,
-      functionName: "addCollateral",
-      args: [tokenAddress, priceFeedId, BigInt(Number(liquidationThreshold) * 100), Number(decimals)],
-    });
+    try {
+      await writeContractAsync({
+        address: lendingPoolAddress,
+        abi: lendingPoolABI,
+        functionName: "addCollateral",
+        args: [tokenAddress, priceFeedId, BigInt(Number(liquidationThreshold) * 100), Number(decimals)],
+      });
+      openDialog("Success", "Collateral added successfully!");
+    } catch (err: any) {
+      openDialog("Error", getShortErrorMessage(err.message));
+    }
   };
 
   const handleSetPlatformFee = async (e: React.FormEvent) => {
     e.preventDefault();
-    await writeContractAsync({
-      address: lendingPoolAddress,
-      abi: lendingPoolABI,
-      functionName: "setPlatformFee",
-      args: [BigInt(newPlatformFee)],
-    });
+    try {
+      await writeContractAsync({
+        address: lendingPoolAddress,
+        abi: lendingPoolABI,
+        functionName: "setPlatformFee",
+        args: [BigInt(newPlatformFee)],
+      });
+      openDialog("Success", "Platform fee set successfully!");
+    } catch (err: any) {
+      openDialog("Error", getShortErrorMessage(err.message));
+    }
   };
 
   const handlePause = async () => {
-    await writeContractAsync({
-      address: lendingPoolAddress,
-      abi: lendingPoolABI,
-      functionName: "pause",
-    });
+    try {
+      await writeContractAsync({
+        address: lendingPoolAddress,
+        abi: lendingPoolABI,
+        functionName: "pause",
+      });
+      openDialog("Success", "Contract paused successfully!");
+    } catch (err: any) {
+      openDialog("Error", getShortErrorMessage(err.message));
+    }
   };
 
   const handleUnpause = async () => {
-    await writeContractAsync({
-      address: lendingPoolAddress,
-      abi: lendingPoolABI,
-      functionName: "unpause",
-    });
+    try {
+      await writeContractAsync({
+        address: lendingPoolAddress,
+        abi: lendingPoolABI,
+        functionName: "unpause",
+      });
+      openDialog("Success", "Contract unpaused successfully!");
+    } catch (err: any) {
+      openDialog("Error", getShortErrorMessage(err.message));
+    }
   };
 
   return (
@@ -134,6 +169,12 @@ export default function Admin() {
       </main>
 
       <Footer />
+      <AlertDialog
+        isOpen={isDialogOpen}
+        onClose={closeDialog}
+        title={dialogTitle}
+        message={dialogMessage}
+      />
     </div>
   );
 }

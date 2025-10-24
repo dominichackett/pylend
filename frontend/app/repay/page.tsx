@@ -6,11 +6,13 @@ import Footer from "../components/Footer";
 import { useAccount, useBalance, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
 import { HermesClient } from "@pythnetwork/hermes-client";
 import { formatUnits, parseUnits, Address } from "viem";
-import { LendingPoolABI, lendingPoolAddress } from "../../lib/contracts";
-import { erc20ABI } from "../../lib/erc20";
 
-// TODO: Replace with actual PYUSD contract address
-const PYUSD_CONTRACT_ADDRESS: Address = "0xCaC524BcA292aaade2DF8A05cC58F0a65B1B3bB9"; // Assuming USDC as PYUSD
+import { getShortErrorMessage } from "../../lib/errors";
+import AlertDialog from "../components/AlertDialog";
+import { lendingPoolABI, lendingPoolAddress } from "@/lib/contracts";
+import { erc20ABI } from "@/lib/erc20";
+
+const PYUSD_CONTRACT_ADDRESS: Address = "0xCaC524BcA292aaade2DF8A05cC58F0a65B1B3bB9"; //  PYUSD
 
 interface Loan {
   id: string;
@@ -50,6 +52,20 @@ export default function Repay() {
   const [repayAmountError, setRepayAmountError] = useState<string | null>(null);
   const [userPyusdBalance, setUserPyusdBalance] = useState<number | null>(null);
   const [isApproved, setIsApproved] = useState<boolean>(false);
+
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [dialogTitle, setDialogTitle] = useState("");
+  const [dialogMessage, setDialogMessage] = useState("");
+
+  const openDialog = (title: string, message: string) => {
+    setDialogTitle(title);
+    setDialogMessage(message);
+    setIsDialogOpen(true);
+  };
+
+  const closeDialog = () => {
+    setIsDialogOpen(false);
+  };
 
   useEffect(() => {
     console.log("Current address from useAccount:", address);
@@ -114,8 +130,8 @@ export default function Repay() {
         functionName: 'approve',
         args: [lendingPoolAddress, amountToApprove],
       });
-    } catch (err) {
-      console.error("Error initiating approve transaction:", err);
+    } catch (err: any) {
+      openDialog("Error", getShortErrorMessage(err.message));
     }
   };
 
@@ -132,12 +148,12 @@ export default function Repay() {
     try {
       await writeContract({
         address: lendingPoolAddress,
-        abi: LendingPoolABI,
+        abi: lendingPoolABI,
         functionName: 'repay',
         args: [selectedLoan.loanId, amountToRepay],
       });
-    } catch (err) {
-      console.error("Error initiating repay transaction:", err);
+    } catch (err: any) {
+      openDialog("Error", getShortErrorMessage(err.message));
     }
   };
 
@@ -473,7 +489,7 @@ export default function Repay() {
 
     
 
-                        className="w-full bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-3 px-4 rounded-full disabled:bg-gray-500"
+                        className="w-full bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-3 px-4 rounded-full disabled:bg-gray-500 cursor-pointer"
 
     
 
@@ -505,7 +521,7 @@ export default function Repay() {
 
     
 
-                        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-full disabled:bg-gray-500"
+                        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-full disabled:bg-gray-500 cursor-pointer"
 
     
 
@@ -545,7 +561,7 @@ export default function Repay() {
 
     
 
-                    {writeError && <div className="text-center mt-4 text-red-500">Error: {writeError.message}</div>}
+                    
 
     
 
@@ -566,6 +582,12 @@ export default function Repay() {
     
 
               <Footer />
+      <AlertDialog
+        isOpen={isDialogOpen}
+        onClose={closeDialog}
+        title={dialogTitle}
+        message={dialogMessage}
+      />
 
     
 
